@@ -1,0 +1,206 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    component: queue
+    {{- include "sharkey.labels" . | nindent 4 }}
+  name: {{ include "sharkey.fullname" . }}-queue
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "sharkey.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "sharkey.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: MK_CONFIG_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretHostKey }}
+            - name: MK_CONFIG_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretPortKey }}
+            - name: MK_CONFIG_DB_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretDatabaseKey }}
+            - name: MK_CONFIG_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretUserKey }}
+            - name: MK_CONFIG_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretPasswordKey }}
+            - name: MK_CONFIG_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.redis.existingSecret }}
+                  key: {{ .Values.sharkey.redis.existingSecretHostKey }}
+            - name: MK_CONFIG_REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.redis.existingSecret }}
+                  key: {{ .Values.sharkey.redis.existingSecretPortKey }}
+            - name: MK_CONFIG_REDIS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.redis.existingSecret }}
+                  key: {{ .Values.sharkey.redis.existingSecretPasswordKey }}
+            - name: MISSKEY_CONFIG_YML
+              value: "/config/config.yaml"
+          volumeMounts:
+            - mountPath: /sharkey/files
+              name: sharkey-files
+            - mountPath: /.cache
+              subPath: cache
+              name: cache-volume
+            - mountPath: /tmp/
+              subPath: tmp
+              name: cache-volume
+            - mountPath: /sharkey/.cache
+              name: cache-volume
+              subPath: sharkey-cache
+            - name: config
+              mountPath: /config/
+      initContainers:
+        - name: {{ .Chart.Name }}-migrations
+          command: ["pnpm", "run", "migrate"]
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: MK_CONFIG_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretHostKey }}
+            - name: MK_CONFIG_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretPortKey }}
+            - name: MK_CONFIG_DB_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretDatabaseKey }}
+            - name: MK_CONFIG_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretUserKey }}
+            - name: MK_CONFIG_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.database.primary.existingSecret }}
+                  key: {{ .Values.sharkey.database.primary.existingSecretPasswordKey }}
+            - name: MK_CONFIG_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.redis.existingSecret }}
+                  key: {{ .Values.sharkey.redis.existingSecretHostKey }}
+            - name: MK_CONFIG_REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.redis.existingSecret }}
+                  key: {{ .Values.sharkey.redis.existingSecretPortKey }}
+            - name: MK_CONFIG_REDIS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sharkey.redis.existingSecret }}
+                  key: {{ .Values.sharkey.redis.existingSecretPasswordKey }}
+            - name: MISSKEY_CONFIG_YML
+              value: "/config/config.yaml"
+            - name: MK_ONLY_QUEUE
+              value: "true"
+          volumeMounts:
+            - mountPath: /sharkey/files
+              name: sharkey-files
+            - mountPath: /.cache
+              subPath: cache
+              name: cache-volume
+            - mountPath: /tmp/
+              subPath: tmp
+              name: cache-volume
+            - mountPath: /sharkey/.cache
+              name: cache-volume
+              subPath: sharkey-cache
+            - name: config
+              mountPath: /config/
+      restartPolicy: Always
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        - name: sharkey-files
+          persistentVolumeClaim:
+            claimName: {{ include "sharkey.fullname" .}}
+        {{- else }}
+        - name: sharkey-files
+          emptyDir:
+            sizeLimit: 4Gi
+        {{- end }}
+        {{- with .Values.nodeSelector }}
+          {{- toYaml ".Values.extraVolumes" | nindent 8 }}
+        {{- end }}
+        - name: cache-volume
+          emptyDir:
+            sizeLimit: 4Gi
+        - name: config
+          configMap:
+            name: sk-config
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
