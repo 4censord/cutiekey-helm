@@ -4,15 +4,15 @@ kind: Deployment
 metadata:
   labels:
     component: queue
-    {{- include "sharkey.labels" . | nindent 4 }}
-  name: {{ include "sharkey.fullname" . }}-queue
+    {{- include "cutiekey.labels" . | nindent 4 }}
+  name: {{ include "cutiekey.fullname" . }}-queue
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "sharkey.selectorLabels" . | nindent 6 }}
+      {{- include "cutiekey.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -20,7 +20,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "sharkey.labels" . | nindent 8 }}
+        {{- include "cutiekey.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -51,57 +51,57 @@ spec:
             - name: MK_CONFIG_DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretHostKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretHostKey }}
             - name: MK_CONFIG_DB_PORT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretPortKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretPortKey }}
             - name: MK_CONFIG_DB_DB
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretDatabaseKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretDatabaseKey }}
             - name: MK_CONFIG_DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretUserKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretUserKey }}
             - name: MK_CONFIG_DB_PASS
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretPasswordKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretPasswordKey }}
             - name: MK_CONFIG_REDIS_HOST
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.redis.existingSecret }}
-                  key: {{ .Values.sharkey.redis.existingSecretHostKey }}
+                  name: {{ .Values.cutiekey.redis.existingSecret }}
+                  key: {{ .Values.cutiekey.redis.existingSecretHostKey }}
             - name: MK_CONFIG_REDIS_PORT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.redis.existingSecret }}
-                  key: {{ .Values.sharkey.redis.existingSecretPortKey }}
+                  name: {{ .Values.cutiekey.redis.existingSecret }}
+                  key: {{ .Values.cutiekey.redis.existingSecretPortKey }}
             - name: MK_CONFIG_REDIS_PASS
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.redis.existingSecret }}
-                  key: {{ .Values.sharkey.redis.existingSecretPasswordKey }}
+                  name: {{ .Values.cutiekey.redis.existingSecret }}
+                  key: {{ .Values.cutiekey.redis.existingSecretPasswordKey }}
             - name: MISSKEY_CONFIG_YML
               value: "/config/config.yaml"
           volumeMounts:
-            - mountPath: /sharkey/files
-              name: sharkey-files
+            - mountPath: /cutiekey/files
+              name: cutiekey-files
             - mountPath: /.cache
               subPath: cache
               name: cache-volume
             - mountPath: /tmp/
               subPath: tmp
               name: cache-volume
-            - mountPath: /sharkey/.cache
+            - mountPath: /cutiekey/.cache
               name: cache-volume
-              subPath: sharkey-cache
+              subPath: cutiekey-cache
             - name: config
               mountPath: /config/
       initContainers:
@@ -117,69 +117,69 @@ spec:
             - name: MK_CONFIG_DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretHostKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretHostKey }}
             - name: MK_CONFIG_DB_PORT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretPortKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretPortKey }}
             - name: MK_CONFIG_DB_DB
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretDatabaseKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretDatabaseKey }}
             - name: MK_CONFIG_DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretUserKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretUserKey }}
             - name: MK_CONFIG_DB_PASS
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.database.primary.existingSecret }}
-                  key: {{ .Values.sharkey.database.primary.existingSecretPasswordKey }}
+                  name: {{ .Values.cutiekey.database.primary.existingSecret }}
+                  key: {{ .Values.cutiekey.database.primary.existingSecretPasswordKey }}
             - name: MK_CONFIG_REDIS_HOST
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.redis.existingSecret }}
-                  key: {{ .Values.sharkey.redis.existingSecretHostKey }}
+                  name: {{ .Values.cutiekey.redis.existingSecret }}
+                  key: {{ .Values.cutiekey.redis.existingSecretHostKey }}
             - name: MK_CONFIG_REDIS_PORT
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.redis.existingSecret }}
-                  key: {{ .Values.sharkey.redis.existingSecretPortKey }}
+                  name: {{ .Values.cutiekey.redis.existingSecret }}
+                  key: {{ .Values.cutiekey.redis.existingSecretPortKey }}
             - name: MK_CONFIG_REDIS_PASS
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.sharkey.redis.existingSecret }}
-                  key: {{ .Values.sharkey.redis.existingSecretPasswordKey }}
+                  name: {{ .Values.cutiekey.redis.existingSecret }}
+                  key: {{ .Values.cutiekey.redis.existingSecretPasswordKey }}
             - name: MISSKEY_CONFIG_YML
               value: "/config/config.yaml"
             - name: MK_ONLY_QUEUE
               value: "true"
           volumeMounts:
-            - mountPath: /sharkey/files
-              name: sharkey-files
+            - mountPath: /cutiekey/files
+              name: cutiekey-files
             - mountPath: /.cache
               subPath: cache
               name: cache-volume
             - mountPath: /tmp/
               subPath: tmp
               name: cache-volume
-            - mountPath: /sharkey/.cache
+            - mountPath: /cutiekey/.cache
               name: cache-volume
-              subPath: sharkey-cache
+              subPath: cutiekey-cache
             - name: config
               mountPath: /config/
       restartPolicy: Always
       volumes:
         {{- if .Values.persistence.enabled }}
-        - name: sharkey-files
+        - name: cutiekey-files
           persistentVolumeClaim:
-            claimName: {{ include "sharkey.fullname" .}}
+            claimName: {{ include "cutiekey.fullname" .}}
         {{- else }}
-        - name: sharkey-files
+        - name: cutiekey-files
           emptyDir:
             sizeLimit: 4Gi
         {{- end }}

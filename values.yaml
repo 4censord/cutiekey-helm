@@ -1,12 +1,12 @@
-# Default values for sharkey.
+# Default values for cutiekey.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 
-sharkey:
+cutiekey:
   configMap: |
     id: "aidx"
-    url: "https://sk.foopool.de"
+    url: "your_url"
     port: 3000
     maxNoteLength: 5000
     customMOTD: [
@@ -18,14 +18,14 @@ sharkey:
   extraEnv: {}
   database:
     primary:
-      existingSecret: "pg-sharkey-app"
+      existingSecret: "pg-cutiekey-app"
       existingSecretHostKey: "host"
       existingSecretPortKey: "port"
       existingSecretUserKey: "user"
       existingSecretDatabaseKey: "dbname"
       existingSecretPasswordKey: "password"
   redis:
-    existingSecret: "pg-sharkey-app"
+    existingSecret: "pg-cutiekey-app"
     existingSecretHostKey: "host"
     existingSecretPortKey: "port"
 
@@ -49,10 +49,10 @@ persistence:
 replicaCount: 1
 
 image:
-  repository: registry.activitypub.software/transfem-org/sharkey
+  repository: registry.activitypub.software/transfem-org/sharkey  # TODO setup cutiekey builds
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2024.6.0-dev-amd64"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
